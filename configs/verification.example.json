@@ -1,0 +1,11 @@
+{
+  "pairs": 32,
+  "min_pairs": 16,
+  "continuation_budget": 20,
+  "token_budget": 20000,
+  "lambda_inference": 0.0,
+  "lambda_tool": 0.1,
+  "alpha": 0.05,
+  "min_effect": 0.0,
+  "seed_start": 1000
+}

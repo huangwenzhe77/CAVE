@@ -1,0 +1,13 @@
+{
+  "benchmark": "alfworld",
+  "task_id": "REPLACE_WITH_GAMEFILE_ID",
+  "task": "REPLACE_WITH_THE_ACTUAL_TASK_GOAL",
+  "constraints": ["Complete the task in the specified ALFWorld game."],
+  "environment": {
+    "config_path": "REPLACE_WITH_ABSOLUTE_PATH_TO_ALFWORLD_CONFIG_YAML",
+    "resource_root": "REPLACE_WITH_RESOURCE_ROOT_FOR_YAML_DATA_PATHS",
+    "gamefile": "REPLACE_WITH_ABSOLUTE_PATH_TO_GAME_TW_PDDL",
+    "split": "eval_out_of_distribution",
+    "max_steps": 50
+  }
+}

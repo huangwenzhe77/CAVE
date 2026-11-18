@@ -1,0 +1,13 @@
+{
+  "benchmark": "webshop",
+  "task_id": "fixed_0",
+  "task": "REPLACE_WITH_THE_ACTUAL_SESSION_INSTRUCTION",
+  "constraints": ["Satisfy all requested attributes, options and price constraints."],
+  "environment": {
+    "base_url": "http://127.0.0.1:3000",
+    "session_idx": "fixed_0",
+    "dataset_revision": "REPLACE_WITH_PRODUCT_AND_TASK_DATASET_REVISION",
+    "max_steps": 15,
+    "timeout_seconds": 30
+  }
+}

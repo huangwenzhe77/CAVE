@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cave-mem"
+version = "0.1.0"
+description = "Source failure memory construction for ALFWorld and WebShop"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+webshop = ["requests>=2.31", "beautifulsoup4>=4.12"]
+alfworld = ["alfworld[full]", "PyYAML>=6"]
+
+[project.scripts]
+cave = "cave.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cave*"]
