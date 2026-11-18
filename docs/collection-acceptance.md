@@ -11,9 +11,9 @@
 | 只重放 t 前动作，返回可用环境、历史和剩余预算 | 通过本地测试及两个 fixture 演示 |
 | 初始/前缀漂移、提前终止、预算耗尽、恢复等级 | 通过本地测试 |
 | 原有 ExpeL 文本导入和其他原型回归 | 测试通过；不代表推进后续任务卡 |
-| 真实 ALFWorld 失败/超时采集及恢复 | 未验收，待服务器安装运行时和数据 |
+| 真实 ALFWorld 失败/超时采集及恢复 | 服务器已通过；见[服务器验收记录](server-collection-acceptance.md) |
 | 真实 WebShop 失败/超时采集及恢复 | 未验收，待服务器启动服务和配置数据版本 |
-| 真实 actor 模型调用 | 未验收，待服务器模型配置 |
+| 真实 actor 模型调用 | 服务器已通过一次实际采集；模型服务只提供别名，未提供不可变权重 revision |
 
 ## 本地复现
 
@@ -21,12 +21,12 @@
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe -m cave m1-demo --output-dir output/m1
+.\.venv\Scripts\python.exe -m cave offline-protocol-demo --output-dir output/offline-protocol-demo
 ```
 
 测试共 46 项，其中 21 项为 M1 测试。M1 测试覆盖真实适配器的接口规则，但使用 mock 或 fixture，不代表真实 benchmark 已运行。
 
-`output/m1/trajectories.jsonl` 保存两个明确标记 `benchmark_results=false` 的 fixture 失败尝试。每条 `<id>.restore.json` 都恢复到 t=2，仅重放一个动作，`ready=true`、新模型调用为 0、剩余环境动作预算为 3。fixture 的完整状态 token 可以支持 exact；真实 ALFWorld/WebShop 当前均为 observational。
+`output/offline-protocol-demo/trajectories.jsonl` 保存两个明确标记 `benchmark_results=false` 的 fixture 失败尝试。每条 `<id>.restore.json` 都恢复到 t=2，仅重放一个动作，`ready=true`、新模型调用为 0、剩余环境动作预算为 3。fixture 的完整状态 token 可以支持 exact；真实 ALFWorld/WebShop 当前均为 observational。
 
 重复运行 demo 会追加两条新轨迹，并创建新的报告，不覆盖此前结果。样例采用脚本 actor，推理 tokens 为真实的 0，不以假造模型成本代替。
 
@@ -89,8 +89,8 @@ python -m unittest discover -s tests -v
 然后分别运行真实采集。示例的步数上限来自各 task 配置；环境错误或模型错误不能代替所需的正常失败/超时样本。
 
 ```bash
-python -m cave collect --task configs/alfworld.server.json --llm-config configs/llm.server.json --run-id aw-m1-001 --attempts 4 --seed 0 --output output/aw-traces.jsonl
-python -m cave collect --task configs/webshop.server.json --llm-config configs/llm.server.json --run-id ws-m1-001 --attempts 4 --seed 0 --output output/ws-traces.jsonl
+python -m cave collect --task configs/alfworld.server.json --llm-config configs/llm.server.json --run-id alfworld-connectivity-check --attempts 4 --seed 0 --output output/aw-traces.jsonl
+python -m cave collect --task configs/webshop.server.json --llm-config configs/llm.server.json --run-id webshop-connectivity-check --attempts 4 --seed 0 --output output/ws-traces.jsonl
 ```
 
 采集 stdout 输出每条 ID/outcome/steps。从各文件选择一条 `failure` 或 `truncated`，人工指定其范围内的 t，再恢复；`--output` 必须为新报告路径。

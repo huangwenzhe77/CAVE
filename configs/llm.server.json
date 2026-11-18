@@ -1,0 +1,9 @@
+{
+  "endpoint": "https://api.aicodemirror.ai/v1",
+  "model": "gpt-6-sol",
+  "model_revision": "gpt-6-sol-service-alias-2026-11-18",
+  "api_key_env": "OPENAI_API_KEY",
+  "temperature": 0.0,
+  "max_tokens": 256,
+  "timeout_seconds": 60
+}

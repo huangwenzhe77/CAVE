@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/train/pick_and_place_simple-SoapBottle-None-Toilet-426/trial_T20190906_180946_873820/game.tw-pddl",
+    "max_steps": 20,
+    "resource_root": "/home/ljj/alfworld-data",
+    "split": "train"
+  },
+  "task": "Put a perfume bottle on a toilet tank.",
+  "task_id": "train-d3c15f1235460cad"
+}

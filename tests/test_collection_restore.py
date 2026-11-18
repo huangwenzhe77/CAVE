@@ -1,4 +1,6 @@
 from dataclasses import asdict, replace
+from contextlib import redirect_stdout
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -10,7 +12,7 @@ from cave.cli import main
 from cave.demo import FixtureEnvironment, fixture_factory
 from cave.io import append_trajectory, load_trajectories, write_json_exclusive
 from cave.llm import ChatActor, ChatClient
-from cave.m1_demo import ScriptedActor, run_demo
+from cave.offline_protocol_demo import ScriptedActor, run_demo
 from cave.restore import restore_before
 from cave.runtime import Observation, Proposal, collect_attempt
 from cave.schema import Trajectory
@@ -103,6 +105,27 @@ class CollectionTests(unittest.TestCase):
             path = Path(folder) / "traces.jsonl"
             append_trajectory(path, trace)
             self.assertEqual(load_trajectories(path)[trace.id].error["phase"], "actor")
+
+    def test_keyboard_interrupt_preserves_completed_steps_as_error(self):
+        class InterruptedActor:
+            identity = "interrupted-actor"
+
+            def __init__(self):
+                self.calls = 0
+
+            def act(self, task, initial, steps, observation, seed):
+                self.calls += 1
+                if self.calls == 1:
+                    return Proposal("open cabinet 1", inference_tokens=5)
+                raise KeyboardInterrupt()
+
+        trace = source_trace(actor=InterruptedActor())
+        self.assertEqual(trace.outcome, "error")
+        self.assertEqual(len(trace.steps), 1)
+        self.assertEqual(trace.error["phase"], "actor")
+        self.assertEqual(trace.error["type"], "KeyboardInterrupt")
+        self.assertFalse(trace.metrics["inference_usage_complete"])
+        self.assertEqual(trace.metrics["inference_tokens"], 5)
 
     def test_setup_reset_and_close_errors_are_recorded(self):
         def broken_factory():
@@ -343,6 +366,34 @@ class BenchmarkContractTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
+    def test_trace_flag_prints_live_step_format_and_persists_trajectory(self):
+        class FakeClient:
+            identity = "trace-fixture"
+
+            def __init__(self, config):
+                pass
+
+            def complete(self, system, user, seed):
+                return "{\"action\":\"look\",\"thoughts\":[\"inspect the room\"]}", 3
+
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            task, config, output = folder / "task.json", folder / "llm.json", folder / "traces.jsonl"
+            write_json_exclusive(task, {"benchmark": "alfworld", "task_id": "fixture",
+                                       "task": "Fixture only", "environment": {"fixture": "cave-protocol-v1"}})
+            write_json_exclusive(config, {})
+            captured = io.StringIO()
+            with patch("cave.cli.ChatClient", FakeClient), patch("cave.cli.create_environment", fixture_factory), \
+                    redirect_stdout(captured):
+                self.assertEqual(main(["collect", "--task", str(task), "--llm-config", str(config),
+                                       "--run-id", "trace-test", "--attempts", "1", "--output", str(output),
+                                       "--trace"]), 0)
+            display = captured.getvalue()
+            for label in ("Task: Fixture only", "Initial observation:", "Thought: inspect the room",
+                          "Action: look", "Observation:", "Inference tokens: 3"):
+                self.assertIn(label, display)
+            self.assertEqual(len(load_trajectories(output)), 1)
+
     def test_setup_error_is_persisted_and_collect_exits_nonzero(self):
         with tempfile.TemporaryDirectory() as folder:
             folder = Path(folder)
@@ -387,7 +438,7 @@ class CommandTests(unittest.TestCase):
             self.assertTrue(all(not t.reflections for t in traces))
             self.assertTrue(all(t.metrics["actor_calls"] == 1 for t in traces))
 
-    def test_m1_demo_and_restore_cli_do_not_call_models(self):
+    def test_offline_protocol_demo_and_restore_cli_do_not_call_models(self):
         with tempfile.TemporaryDirectory() as folder:
             result = run_demo(folder)
             self.assertFalse(result["benchmark_results"])

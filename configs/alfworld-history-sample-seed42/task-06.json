@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/train/pick_and_place_simple-TissueBox-None-Toilet-402/trial_T20190908_060020_023543/game.tw-pddl",
+    "max_steps": 20,
+    "resource_root": "/home/ljj/alfworld-data",
+    "split": "train"
+  },
+  "task": "put some tissuebox on toilet.",
+  "task_id": "train-ca7dfd088bfc7066"
+}

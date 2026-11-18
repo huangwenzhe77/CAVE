@@ -63,7 +63,8 @@ def is_terminal(observation: Observation) -> bool:
 def collect_attempt(environment: Environment | Callable[[], Environment], actor: Actor, *, benchmark: str,
                     task_id: str, task: str, run_id: str, environment_config: dict,
                     max_steps: int = 50, seed: int = 0, attempt: int = 0,
-                    constraints: tuple[str, ...] = (), token_budget: int | None = None) -> Trajectory:
+                    constraints: tuple[str, ...] = (), token_budget: int | None = None,
+                    on_step: Callable[[Step], None] | None = None) -> Trajectory:
     if type(max_steps) is not int or max_steps < 1:
         raise ValueError("max_steps must be positive")
     if token_budget is not None and (type(token_budget) is not int or token_budget < 1):
@@ -113,18 +114,22 @@ def collect_attempt(environment: Environment | Callable[[], Environment], actor:
             pending = None
             phase = "state_token"
             steps[-1] = replace(steps[-1], state_token_after=env.state_token())
+            if on_step is not None:
+                phase = "progress_output"
+                on_step(steps[-1])
         outcome = ("success" if observation.success else "truncated" if observation.truncated
                    else "failure" if observation.terminated else "truncated")
         if reason == "collection_error":
             reason = observation.reason or ("environment_success" if observation.success else
                      "environment_truncated" if observation.truncated else
                      "environment_terminated" if observation.terminated else "step_budget_exhausted")
-    except Exception as exc:
+    except (Exception, KeyboardInterrupt) as exc:
         reported_tokens = getattr(exc, "inference_tokens", None)
         usage_known = type(reported_tokens) is int and reported_tokens >= 0
         if phase == "actor" and usage_known:
             tokens += reported_tokens
-        error = {"phase": phase, "type": type(exc).__name__, "message": str(exc),
+        error = {"phase": phase, "type": type(exc).__name__,
+                 "message": str(exc) or "Interrupted by user",
                  "pending_proposal": pending,
                  "raw_actor_response": getattr(exc, "raw_response", None),
                  "inference_usage_complete": phase != "actor" or usage_known,

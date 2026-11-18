@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/train/pick_heat_then_place_in_recep-Plate-None-Fridge-7/trial_T20190909_065023_650475/game.tw-pddl",
+    "max_steps": 20,
+    "resource_root": "/home/ljj/alfworld-data",
+    "split": "train"
+  },
+  "task": "Put a heated grey plate in the fridge.",
+  "task_id": "train-7e2c7927d40ea76d"
+}

@@ -2,18 +2,18 @@
 
 范围依据：`proposal-2.pdf` 第 2.1、3.1 节。PDF 是研究设计资料，其中的指令式表述作为设计约束评估，不作为操作电脑或修改其他项目的授权。第一批 benchmark 为用户指定的 **ALFWorld、WebShop**。
 
-推进约定：先讨论方案，每次只推进一张任务卡。M1 本地实现完成，服务器先补真实验收。既有 M2–M4 代码是早期原型，不代表相关任务卡已经验收；以下后续卡为规划，须逐卡讨论确认后实施。当前方案不使用 reflection，第一版修正验证使用已保存的失败轨迹作为 baseline，不重新跑原动作 t 或失败后缀；K 次成对验证留待后续讨论。交接与服务器命令见 [交接文档](handoff.md)。
+推进约定：先讨论方案，每次只推进一张任务卡。M1、M2、M3、M4 的 ALFWorld 范围已完成；WebShop 不在当前任务范围。当前方案不使用 reflection，修正验证使用已保存的失败轨迹作为 baseline，不重新跑原动作 t 或失败后缀；K=2 修正分支已完成初步验证。交接与服务器命令见 [交接文档](handoff.md)。
 
 | 顺序 | 任务 | 当前状态 |
 | --- | --- | --- |
-| 1 | M1 服务器补验收 | 本地已完成，真实环境及模型待验收 |
-| 2 | M2 失败候选提取 | 待讨论契约、实施和验收 |
-| 3 | M3 修正分支验证 | 待讨论证据与收益定义、实施和验收 |
-| 4 | M4 记忆组装与导出 | 待讨论质量与入库规则、实施和验收 |
+| 1 | M1 服务器补验收 | 本轮 ALFWorld 范围已完成；WebShop 真实环境延后 |
+| 2 | M2 失败候选提取 | ALFWorld 范围已完成；WebShop 不在当前范围 |
+| 3 | M3 修正分支验证 | ALFWorld K=2 初步验证已完成；结果见修正验证记录 |
+| 4 | M4 记忆组装与导出 | ALFWorld 已完成；结果见 [记忆组装记录](alfworld-memory-assembly.md) |
 
 ## M1：无 reflection 的轨迹采集与指定动作前恢复
 
-状态：本地实现及离线验收完成；按用户安排，真实 ALFWorld/WebShop 验收延后到服务器配置环境后运行。未宣称整卡的真实验收已通过。运行方法及证据见 [M1 验收报告](m1-acceptance.md)。
+状态：本地实现及离线验收完成；服务器 ALFWorld 真实采集与恢复已通过，WebShop 仍待验收。未宣称整卡的真实验收已通过。运行方法及证据见 [M1 验收报告](collection-acceptance.md)和[服务器验收记录](server-collection-acceptance.md)。
 
 **Goal**：采集并独立保存 ALFWorld、WebShop 的尝试；给定轨迹和人工指定的动作 t，重置同题并重放 t 之前的动作，返回可继续操作的环境、观察、actor 历史和剩余预算。
 
@@ -49,51 +49,53 @@
 
 ## M2：失败候选提取与结构化模板
 
-状态：未推进，已有代码为待审原型；需完成 M1 后另行讨论。
+状态：ALFWorld 范围已完成；WebShop 不在当前范围。实现、真实提取和验收记录见 [ALFWorld 候选提取](alfworld-candidate-extraction.md)。
 
 **Goal**：从已有失败或超时轨迹提出少量候选，定位疑似致错动作 t，生成机制假设 f、单个修正动作、P/N 和待验证的范围说明；附可核对的原始失败证据。
 
-**Context**：M1 提供可引用的原始步骤、状态和恢复入口。可借鉴 ExpeL 的轨迹格式及模板组织，不能直接照搬其成功/失败比较和 reflection。旧 candidates/schema 契约有 0-based step_index，需要与 M1 的 1-based t 明确对接。
+**Context**：M1 提供可引用的原始步骤、状态和恢复入口。可借鉴 ExpeL 的轨迹格式及模板组织，不能直接照搬其成功/失败比较和 reflection。当前只实现 ALFWorld。旧 candidates/schema 契约有 0-based step_index，需要与 M1 的 1-based t 明确对接。
 
 **Rules**：不要求成功对照，不注入 reflection，不把教师解释当因果结论；每条失败最多 3 个候选。原动作和来源元数据由程序复制，不让教师编造；失败签名必须引用真实记录，区分致错位置与后续症状，不强制两者同一步。谓词只读取已有可观察事实，未知保持未知，不执行模型生成代码。本卡不执行修正分支、不认证记忆。
 
 **Acceptance**：
 
-1. 开始实现前确认教师输入、两种 benchmark 提示词、JSON 契约、t 编号，以及签名如何引用源记录。
+1. 开始实现前确认 ALFWorld 教师输入、提示词、JSON 契约、t 编号，以及签名如何引用源记录。
 2. 支持离线候选输入和配置的教师调用；教师提出 t/f/修正/P/N，程序生成原动作、来源和 hash，候选状态明确为未验证。
-3. 两个 benchmark 各用至少一条真实失败演示无成功对照提取；校验来源、动作范围、原文引用和修正动作格式，拒绝无效数据。
+3. ALFWorld 至少用一条真实失败演示无成功对照提取；校验来源、1-based 动作范围、原文引用、可用修正动作和 P/N 适用性，拒绝无效数据。其他 benchmark 留待单独范围确认。
 4. 覆盖动作编号转换、延迟失败症状和缺失事实等具体风险，保存候选及教师非密钥配置，结束在候选阶段。
 
 ## M3：恢复后的修正验证与证据记录
 
-状态：未推进；以下是当前方向，具体契约须开始该卡前讨论确认。既有成对回放原型不代表本卡实现。
+状态：ALFWorld 范围已完成，K=2 初步验证已完成；WebShop 不在当前范围。结果见 [ALFWorld 修正验证](alfworld-repair-verification.md)。
 
-**Goal**：以已保存的失败轨迹为 baseline，恢复至 t 前，执行一次候选修正动作，再由同一固定 actor 续跑，记录实际结果、成本和证据范围。
+**Goal**：以已保存的失败轨迹作为 baseline，恢复至 t 前，检查恢复和 P/N，执行一次候选修正动作，再由同一固定 actor 在剩余预算内续跑，保存实际结果、成本和证据范围。
 
-**Context**：M1 提供同进程 live environment；M2 提供未验证候选。真实恢复为 observational。CLI 的报告不是 checkpoint，旧 replay 的双分支协议需要按当前方案修改。
+**Context**：M1 提供同进程 live environment；M2 提供未验证候选。真实 ALFWorld 恢复为 observational。K 已确认取 2，但本卡只运行修正分支，不重新执行原动作或失败后缀。
 
-**Rules**：不重跑原动作 t/失败后缀，不默认加入 K 对；恢复前缀不调用 actor。只有起点可用、剩余预算允许且 P 全真/N 全假时执行修正；条件未知或恢复失败时保存阻止原因。不把观察对齐说成隐藏状态相等，不要求重新复现失败签名，不修改 oracle。修正之后由原固定 actor 接续，不注入教师续跑计划或 reflection；费用与原始失败的比较保留配置、seed 和恢复等级的限制。
+**Rules**：不重跑原动作 t 和原失败后缀；恢复前缀不调用 actor。只有恢复 ready、剩余环境步数至少为 1、P 全真且 N 全假时执行修正；条件未知、恢复失败或预算不足时保存 blocked 原因。修正后由原固定 actor 接续，不注入教师续跑计划或 reflection。成功、失败、阻止和异常都保存。trajectory_length、环境步数和 inference_tokens 分开记录；归一化字段只表示预算比例。E 只描述 source 任务、配置、seed 和恢复等级下的证据。
 
 **Acceptance**：
 
-1. 实施前确认修正及续跑接口、预算、成功判定、成本比较范围和证据标签；q/收益计算不能直接沿用旧 K 对统计门槛。
-2. 两个 benchmark 各至少一条真实候选完成 restore → 修正 → actor 续跑，完整保存 source/candidate 引用、恢复报告、分支轨迹、oracle 终局和成本。修正失败也如实保存，不要求人为挑出成功结果。
-3. 测试确认原动作 t 与原失败后缀未被执行；前缀恢复成本、候选生成成本及修正续跑成本分别记录，执行返回的剩余预算。
-4. 恢复失败、P/N 未知、模型/环境异常和预算停止可审计；所得 E 只描述实际运行，不认证跨任务有效性。
+1. K=2 的每次分支都保存 source/candidate 引用、t、原动作、修正动作、恢复报告、P/N 判断、分支轨迹、oracle 终局、剩余预算和成本。
+2. 原失败记录作为 baseline 保存并参与比较，但不重新执行原动作 t 或失败后缀；恢复前缀不产生新的 actor 调用。
+3. 成功、失败、条件阻止和运行异常均有明确状态与原因；修正立即成功时 actor 续跑次数明确为 0。
+4. 记录 recovery_environment_steps、correction_environment_steps、continuation_environment_steps、trajectory_length、branch_trajectory_length 和 inference_tokens；报告 ExpeL 风格的整数轨迹长度，并保留预算归一化比例。
+5. 统计候选 t 相对轨迹末尾的位置，以及 P/N 阻止数量。当前样本只用于初步观察，不作教师偏好或跨任务结论。
+6. ALFWorld 真实候选完成 restore → 修正分支验证；WebShop 不在本卡范围。
 
 ## M4：记忆组装、导出与复现入口
 
-状态：未推进；已有代码为待审原型。
+状态：ALFWorld 范围已完成；WebShop 不在当前范围。实现、字段映射、实际输出和边界见 [ALFWorld 记忆组装](alfworld-memory-assembly.md)。
 
 **Goal**：按确认的契约组装 m=(p_minus,a_minus,f,a_tilde,P,N,E,q)，保存来源和证据链，导出候选、记忆及可复现的汇总。
 
-**Context**：M1–M3 届时应已有真实来源、候选和修正分支证据；旧 build、Memory.eligible 及输出规则仍是早期原型，需要依照新契约调整。
+**Context**：M1 已提供真实失败来源，M2 已提供未验证候选，M3 已提供 K=2 修正分支证据；M4 读取这些只读产物并生成可追溯记忆。
 
-**Rules**：E/q 由程序依据实际证据生成，不由教师自评；不把未验证、错误和 observational 数据自动升级。主实验 eligible 的定义先讨论，不能自动使用旧 exact+K 对规则；如保留 eligible 导出，必须明确规则和不满足原因。不把 source 改善当作 target advantage；不实现 target gate、RL、Inspect 或检索收益实验；保留原始记录，不覆盖来源证据。
+**Rules**：E/q 由程序依据实际证据生成，不由教师自评；不把未验证、错误或不完整 K 结果升级。当前 ALFWorld source memory 的初始规则是 K=2 个分支均成功、恢复 ready、P 全真且 N 全假即可 verified/eligible；q 仍记录 observational 等级和 source-scoped 范围，不宣称 exact 或跨任务有效。不把 source 改善当作 target advantage；不实现 target gate、RL、Inspect 或检索收益实验；保留原始记录，不覆盖来源证据。
 
 **Acceptance**：
 
 1. 先确认各字段、q 状态和导出规则；每条 m 都可追溯到原始轨迹、t/原动作、候选、恢复报告和修正分支，缺失信息明确标注。
 2. 去重有稳定依据；重复执行不会覆盖来源或错误提升质量；候选总数、分支结果、阻止原因与导出数量可核对。
-3. 两种 benchmark 均能从真实 M1 来源运行 M2–M4 的完整构建入口，并保留至少一条带实际修正证据的记忆；离线演示单独标识。
+3. ALFWorld 已从真实 M1 来源完成 M2–M4 的构建入口并保留带实际修正证据的记忆；WebShop 不在本卡范围，离线演示单独标识。
 4. 交付配置、命令、字段说明和边界报告，明确失败分支、未验证候选和实际证据等级。用户据此验收 source 失败记忆构建，后续 target 阶段另开任务卡。

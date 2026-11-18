@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "task_id": "valid_seen-bowl-coffeetable-201-trial_T20190907_171639_045329",
+  "task": "Move a bowl from a dining table to a coffee table.",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "resource_root": "/home/ljj/alfworld-data",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/valid_seen/pick_and_place_simple-Bowl-None-CoffeeTable-201/trial_T20190907_171639_045329/game.tw-pddl",
+    "split": "eval_in_distribution",
+    "max_steps": 8
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/train/pick_clean_then_place_in_recep-Bowl-None-DiningTable-21/trial_T20190907_000031_668520/game.tw-pddl",
+    "max_steps": 20,
+    "resource_root": "/home/ljj/alfworld-data",
+    "split": "train"
+  },
+  "task": "Put a bowl full of water on a table.",
+  "task_id": "train-0fed974808e6c1cd"
+}

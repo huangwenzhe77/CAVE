@@ -49,9 +49,24 @@ class AlfworldEnvironment:
             return value
 
         settings = resolve_resources(settings)
-        self.main = getattr(environments, settings["env"]["type"])(
-            settings, train_eval=config.get("split", settings.get("split", "eval_out_of_distribution")))
-        self.main.game_files = [config["gamefile"]]
+        split = config.get("split", settings.get("split", "eval_out_of_distribution"))
+        path_key = {
+            "train": "data_path",
+            "eval_in_distribution": "eval_id_data_path",
+            "eval_out_of_distribution": "eval_ood_data_path",
+        }.get(split)
+        if path_key is None:
+            raise ValueError(f"Unsupported ALFWorld split: {split}")
+        gamefile = Path(config["gamefile"]).resolve()
+        split_root = Path(settings["dataset"][path_key]).resolve()
+        if not gamefile.is_relative_to(split_root):
+            raise ValueError("ALFWorld gamefile is outside the declared split")
+        # This adapter runs one pinned game. Avoid scanning the entire split in
+        # the upstream constructor before assigning the selected gamefile.
+        settings["dataset"][path_key] = str(gamefile.parent)
+        self.main = environments.get_environment(settings["env"]["type"])(
+            settings, train_eval=split)
+        self.main.game_files = [str(gamefile)]
         self.max_steps = int(config.get("max_steps", 50))
         if self.max_steps < 1:
             raise ValueError("max_steps must be positive")

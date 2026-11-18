@@ -1,0 +1,15 @@
+{
+  "benchmark": "alfworld",
+  "constraints": [
+    "Complete the specified ALFWorld game using environment actions."
+  ],
+  "environment": {
+    "config_path": "/home/ljj/CAVE/configs/alfworld.server.yaml",
+    "gamefile": "/home/ljj/alfworld-data/json_2.1.1/train/pick_two_obj_and_place-HandTowel-None-CounterTop-409/trial_T20190909_065422_153174/game.tw-pddl",
+    "max_steps": 20,
+    "resource_root": "/home/ljj/alfworld-data",
+    "split": "train"
+  },
+  "task": "Put two towels on the counter.",
+  "task_id": "train-38357aae18f3c1a9"
+}
