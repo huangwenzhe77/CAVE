@@ -4,6 +4,8 @@
 
 推进约定：先讨论方案，每次只推进一张任务卡。M1、M2、M3、M4 的 ALFWorld 范围已完成；WebShop 不在当前任务范围。当前方案不使用 reflection，修正验证使用已保存的失败轨迹作为 baseline，不重新跑原动作 t 或失败后缀；K=2 修正分支已完成初步验证。交接与服务器命令见 [交接文档](handoff.md)。
 
+训练数据构造阶段的独立任务卡见[训练数据任务卡](training-data-tasks.md)。该阶段的数据角色应在构造 source memory 前划分；现有 source 任务是在 outcome 前按 seed 抽样，但完整四路 manifest 当前补冻中。
+
 | 顺序 | 任务 | 当前状态 |
 | --- | --- | --- |
 | 1 | M1 服务器补验收 | 本轮 ALFWorld 范围已完成；WebShop 真实环境延后 |

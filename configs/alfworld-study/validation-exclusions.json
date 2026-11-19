@@ -1,0 +1,8 @@
+{
+  "validation_exclusions": [
+    {
+      "relative_gamefile": "pick_and_place_simple-Bowl-None-CoffeeTable-201/trial_T20190907_171639_045329/game.tw-pddl",
+      "reason": "Previously used for the M1 valid_seen connectivity smoke run; exclude its template group from formal validation."
+    }
+  ]
+}
